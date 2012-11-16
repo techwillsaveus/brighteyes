@@ -12,4 +12,4 @@ This project will be updated very soon to also include more demos and examples.
 
 Credits
 ==========
-Converter and SDPlayer code developed by Stefan Dzisiewski-Smith for Technology Will Save Us
+Converter and SDPlayer code developed by Stefan Dzisiewski-Smith for <a href="http://technologywillsaveus.org/" target="_blank">Technology Will Save Us</a>
