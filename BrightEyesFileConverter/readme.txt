@@ -1,4 +1,5 @@
 Place the input video file in the /data/ folder, named "input.mov". Input format is ideally 627x220, 30 fps, MUST be .mov.
+We also recommend using the Animation/Millions of Colors preset when exporting your .mov files.
 
 Anything outside that size will be scaled, anything of a different FPS will be played at 30 FPS (unless SDplayer.ino, the player firmware for Bright Eyes, is modified).
 
