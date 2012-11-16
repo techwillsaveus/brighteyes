@@ -9,4 +9,4 @@ This is where you will find:
 
 Do check out the READMEs on both the Processing Converter and Arduino SDPlayer for more details.
 
-This will be updated very soon to also include more demos and examples
+This will be updated very soon to also include more demos and examples.
