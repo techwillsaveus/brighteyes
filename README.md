@@ -14,6 +14,7 @@ Credits
 ==========
 Converter and SDPlayer code developed by Stefan Dzisiewski-Smith for <a href="http://technologywillsaveus.org/" target="_blank">Technology Will Save Us</a>
 
+FORKED FROM https://github.com/twsu
 
 /*
 
@@ -21,8 +22,10 @@ Added after by <a href="http://github.com/benMcChesney/" target="_blank">Ben McC
 BRIGHT EYES ARE AWESOME ! But I couldn't get the processing app to work so I'm porting it to Open Frameworks
 
 Built with Open Frameworks 0073
+
 */
 
-/ofxBrightEyesFileConverter/ is the OF Port of "Converter" in processing
-/apps/ has compiled applications if you don't know C++ 
+ ofxBrightEyesFileConverter/ is the OF Port of "Converter" in processing
+
+ apps/ has compiled applications if you don't know C++ 
 
