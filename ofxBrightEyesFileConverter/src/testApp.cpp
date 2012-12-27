@@ -40,7 +40,13 @@ void testApp::setup()
         
     }
     
-    currentStatus = " app initialized ! " ; 
+    currentStatus = " app initialized ! " ;
+    
+    fbo.allocate( 627 , 220, GL_RGB ) ;
+    fbo.begin() ;
+        ofClear( 0 , 0 , 0 ) ;
+    fbo.end( );
+    bRecordGenerative = false ;
 }
 
 //--------------------------------------------------------------
@@ -49,10 +55,17 @@ void testApp::update()
     movie.update( ) ;
     if ( bConverting == true )
     {
-        convertFrame() ;
-        if ( movie.getIsMovieDone() )
+        if ( bRecordGenerative == false )
         {
-            endConversion( ) ;
+            convertMovieFrame() ;
+            if ( movie.getIsMovieDone() )
+            {
+                endConversion( ) ;
+            }
+        }
+        else
+        {
+            convertFboFrame() ;
         }
     }
 }
@@ -65,8 +78,30 @@ void testApp::draw()
     ofPushMatrix() ;
         //Draw the movie
         ofTranslate( 25 , 25 ) ;
-        movie.draw( 0 , movie.getHeight() ) ;
-    
+        
+        if ( bRecordGenerative == false )
+        {
+            movie.draw( 0 , movie.getHeight() ) ;
+        }
+        else
+        {
+            ofPushMatrix() ;
+                ofTranslate( 0 , 220 ) ;
+                fbo.begin() ;
+                ofSetColor( 0 , 0 , 0 ) ;
+                ofRect( 0 , 0 , ofGetWidth() , ofGetHeight() ) ;
+                
+                float h = fbo.getHeight() / 2 ; 
+                ofTranslate( 0 , h ) ;
+                ofSetColor( 255 , 255 , 255 ) ;
+                float nowH = sin ( ofGetElapsedTimef() ) * h ; 
+                ofRect( 0 , -nowH , fbo.getWidth() , nowH * 2 ) ;
+                
+                fbo.end() ;
+                ofSetColor( 255 , 255 , 255 ) ;
+                fbo.draw( 0 , 0 ) ;
+            ofPopMatrix() ;
+        }
         ofSetColor( 255 , 255 , 255 ) ;
         ofEnableAlphaBlending() ;
         //Draw the LEDs
@@ -87,14 +122,15 @@ void testApp::draw()
         instructions += " converting frame : " + ofToString( movie.getCurrentFrame() ) + " of " + ofToString( movie.getTotalNumFrames() )  + " to file : ";
     }
     
-    instructions += "\nO - open file\nS - save file \nL - show LEDs : " + ofToString( showLeds) + " \nT - show text : " + ofToString( showText ) ;
+    instructions += "\nO - open file\nS - save file \nL - show LEDs : " + ofToString( showLeds) + " \nT - show text : " + ofToString( showText ) + "\nG - toggle generative " + ofToString( bRecordGenerative ) ; 
     
     instructions += "\n" + currentStatus ;
+    
     ofDrawBitmapStringHighlight( instructions , ofPoint( 15 , ofGetHeight() - 115 ) ) ;
 
 }
 
-void testApp::convertFrame( )
+void testApp::convertMovieFrame( )
 {
     // a few variables for the pixel mapping
     float dstX = 0.0f ;
@@ -155,6 +191,76 @@ void testApp::convertFrame( )
     }
 }
 
+void testApp::convertFboFrame( )
+{
+    // a few variables for the pixel mapping
+    float dstX = 0.0f ;
+    float dstY = 0.0f ;
+    float srcX = 0 ;
+    float srcY = 0 ;
+    float accum = 0.0f ;
+    float pixelCount = 0.0f ;
+    
+    srcW = movie.getWidth() ;
+    srcH = movie.getHeight() ;
+    dstW = movie.getWidth() ;
+    dstH = movie.getHeight() ;
+    
+    ofPixels pix ;
+    pix.allocate( fbo.getWidth() , fbo.getHeight() , 3 ) ;
+    
+    fbo.readToPixels( pix ) ; 
+    srcW = fbo.getWidth() ;
+    srcH = fbo.getHeight() ;
+    dstW = fbo.getWidth() ;
+    dstH = fbo.getHeight() ;
+   
+    // one LED at a time
+    for(int j=0; j<numLeds; j++)
+    {
+        // reset the accumulator and pixel counter
+        accum = 0.0;
+        pixelCount = 0.0;
+        
+        int numPixels = 0 ;
+        float totalBrightness = 0.0f ;
+        
+        //cout << " led @ " << j << endl ;
+        // run through each pixel in the LED rectangle
+        for(int l = nodes[j].leftX; l <= nodes[j].rightX; l++)
+        {
+            // extract destination X and calculate source X in movie
+            dstX = l;
+            srcX = (dstX/dstW)*srcW;
+            
+            for(int m = nodes[j].topY; m <= nodes[j].bottomY; m++)
+            {
+                // extract destination Y and calculate source Y in movie
+                dstY = m;
+                srcY = (dstY/dstH)*srcH;
+                ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
+                float brightness = (col.r + col.g + col.b) / 3.0f ;
+                //cout << "brightness : " << brightness << " srcX : " << srcX << " srcY " << srcY << endl ;
+                totalBrightness += brightness ;
+                nodes[ j ].brightness = brightness ;
+                // add the R, G and B values of this pixel to our accumulator
+                accum += col.r ;
+                accum += col.g ;
+                accum += col.b ;
+                pixelCount += 3.0; // account for three pixels, one each of R, G, B
+            }
+            
+            numPixels++ ;
+        }
+        //cout << "totalBrightness : " << totalBrightness << " / numPixels " << numPixels << endl ;
+        nodes[ j ].brightness = ( totalBrightness ) / (float) numPixels ;
+        
+        // write the average greyscale value across the rectangle to the output array
+        outputArray.push_back( (unsigned char)(accum/pixelCount) ) ;
+    }
+
+}
+
 
 
 //--------------------------------------------------------------
@@ -164,11 +270,6 @@ void testApp::keyPressed(int key){
         case 'o':
         case 'O':
             loadMovie( ) ; 
-            break ;
-            
-        case 's':
-        case 'S':
-            saveOutputFile( ) ;
             break ;
             
         case 'l':
@@ -188,15 +289,23 @@ void testApp::keyPressed(int key){
             {
                 startConversion( ) ;
             }
-///
+            else
+            {
+                endConversion() ; 
+            }
             break ;
+            
+        case 'g':
+        case 'G':
+            bRecordGenerative = !bRecordGenerative ;
+            break ; 
+            
     }
 }
 
 void testApp::startConversion( )
 {
     bConverting = true ;
-    k = 0;
     outputArray.clear() ;
     movie.firstFrame() ;
     movie.play() ;
@@ -217,6 +326,9 @@ void testApp::endConversion()
     //Everything has been written! Now let's output t a file
     //first we create the file
     string fileName = videoPath + ".dat" ;
+    if ( bRecordGenerative == true )
+        fileName = "generative.dat" ;
+    
     ofFile dataFile = ofFile(  ) ;
      
     dataFile.create( ) ;
@@ -259,9 +371,7 @@ void testApp::loadMovie( )
         movie.firstFrame() ;
         movie.play() ;
         numFrames = movie.getTotalNumFrames();
-        outputFileSize = headerLen + ( numFrames * numLeds ) ;
-        outputString = "" ;
-        k = 0;
+        int outputFileSize = headerLen + ( numFrames * numLeds ) ; 
         videoPath = result.getName() ;
         videoPath = videoPath.substr( 0 , videoPath.size() - 4 ) ;
         cout << "videoPath : " << videoPath << endl ;
@@ -271,11 +381,6 @@ void testApp::loadMovie( )
     {
         currentStatus = " movie could NOT be LOADED " ;
     }
-}
-
-void testApp::saveOutputFile( )
-{
-    
 }
 
 //--------------------------------------------------------------

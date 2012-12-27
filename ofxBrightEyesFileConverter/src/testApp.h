@@ -21,7 +21,6 @@ class testApp : public ofBaseApp
 		void gotMessage(ofMessage msg);
     
         void loadMovie( ) ;
-        void saveOutputFile( ) ;
         string videoPath ; 
     
         ofVideoPlayer movie ;
@@ -39,13 +38,8 @@ class testApp : public ofBaseApp
         float srcW;
         float srcH;
     
-        int minMovieIndex ;
-        int maxMovieIndex ;
         string header ;
-        int outputFileSize ;
-        string outputString ;
         vector<unsigned char> outputArray ;
-        int k;
     
         // GUI
         bool showLeds ;
@@ -54,8 +48,12 @@ class testApp : public ofBaseApp
         vector<LEDNode> nodes ;
         void startConversion( ) ;
         void endConversion( ) ;
-        void convertFrame( ) ;
+        void convertMovieFrame( ) ;
+        void convertFboFrame( ) ; 
     
         ofBuffer buffer ;
-        string currentStatus ; 
+        string currentStatus ;
+    
+        ofFbo fbo ;
+        bool bRecordGenerative ;
 };
