@@ -15,14 +15,15 @@ class LEDNode
         LEDNode( ) { }
         ~LEDNode( ) { }
     
-        int leftX;
+        int leftX;                  
         int rightX;
         int topY;
         int bottomY;
         int address ;
     
-        unsigned char brightness ; 
+        unsigned char brightness ;  //how bright the LED is
         
+    
         void setup ( int _address , int _leftX, int _rightX, int _topY, int _bottomY )
         {
             address = _address ;
@@ -35,6 +36,7 @@ class LEDNode
     
         void draw( )
         {
+            //Draw a simple rectangle with the brightness of the LED
             ofPushMatrix( ) ;
                 ofTranslate( rightX , topY ) ;
                 
@@ -43,9 +45,8 @@ class LEDNode
                 ofRect( 0 , 0 , rightX - leftX , topY - bottomY ) ; 
 
                 ofSetLineWidth( 1 ) ; 
-                ofSetColor( brightness ) ;
+                ofSetColor( brightness , brightness , brightness , 255 ) ;
                 ofRect( 0 , 0 , rightX - leftX , topY - bottomY ) ;
-                //ofDrawBitmapStringHighlight( ofToString( address ) , ofPoint( -5 , -15 )) ;
             ofPopMatrix();
         }
     

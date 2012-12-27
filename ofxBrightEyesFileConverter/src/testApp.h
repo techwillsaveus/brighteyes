@@ -22,6 +22,7 @@ class testApp : public ofBaseApp
     
         void loadMovie( ) ;
         void saveOutputFile( ) ;
+        string videoPath ; 
     
         ofVideoPlayer movie ;
         bool bPlaying ;
@@ -42,6 +43,7 @@ class testApp : public ofBaseApp
         int maxMovieIndex ;
         string header ;
         int outputFileSize ;
+        string outputString ;
         vector<unsigned char> outputArray ;
         int k;
     
@@ -51,5 +53,9 @@ class testApp : public ofBaseApp
     
         vector<LEDNode> nodes ;
         void startConversion( ) ;
+        void endConversion( ) ;
         void convertFrame( ) ;
+    
+        ofBuffer buffer ;
+        string currentStatus ; 
 };
