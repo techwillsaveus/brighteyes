@@ -15,10 +15,11 @@ class LEDNode
         LEDNode( ) { }
         ~LEDNode( ) { }
     
-        int leftX;                  
-        int rightX;
-        int topY;
-        int bottomY;
+       // int leftX;
+       // int rightX;
+       // int topY;
+       // int bottomY;
+        ofRectangle area ; 
         int address ;
     
         unsigned char brightness ;  //how bright the LED is
@@ -27,27 +28,20 @@ class LEDNode
         void setup ( int _address , int _leftX, int _rightX, int _topY, int _bottomY )
         {
             address = _address ;
-            leftX = _leftX;
-            rightX = _rightX;
-            topY = _topY;
-            bottomY = _bottomY;
-            brightness = ofRandom( 0 , 255 ) ; 
+            brightness = ofRandom( 0 , 255 ) ;
+            area = ofRectangle( _leftX , _topY , _rightX - _leftX , _bottomY - _topY ) ;
         }
     
         void draw( )
         {
             //Draw a simple rectangle with the brightness of the LED
-            ofPushMatrix( ) ;
-                ofTranslate( rightX , topY ) ;
-                
-                ofSetColor( 0 , 0 , 0 ) ;
-                ofSetLineWidth( 3 ) ;
-                ofRect( 0 , 0 , rightX - leftX , topY - bottomY ) ; 
+            ofSetColor( 0 , 0 , 0 ) ;
+            ofSetLineWidth( 3 ) ;
+            ofRect( area ) ;
 
-                ofSetLineWidth( 1 ) ; 
-                ofSetColor( brightness , brightness , brightness , 255 ) ;
-                ofRect( 0 , 0 , rightX - leftX , topY - bottomY ) ;
-            ofPopMatrix();
+            ofSetLineWidth( 1 ) ;
+            ofSetColor( brightness , brightness , brightness , 255 ) ;
+            ofRect( area ) ;
         }
     
     
