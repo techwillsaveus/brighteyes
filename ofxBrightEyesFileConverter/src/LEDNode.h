@@ -15,10 +15,10 @@ class LEDNode
         LEDNode( ) { }
         ~LEDNode( ) { }
     
-       // int leftX;
-       // int rightX;
-       // int topY;
-       // int bottomY;
+        int leftX;
+        int rightX;
+        int topY;
+        int bottomY;
         ofRectangle area ; 
         int address ;
     
@@ -28,6 +28,10 @@ class LEDNode
         void setup ( int _address , int _leftX, int _rightX, int _topY, int _bottomY )
         {
             address = _address ;
+            leftX = _leftX ;
+            rightX = _rightX ;
+            topY = _topY ;
+            bottomY = _bottomY ; 
             brightness = ofRandom( 0 , 255 ) ;
             area = ofRectangle( _leftX , _topY , _rightX - _leftX , _bottomY - _topY ) ;
         }

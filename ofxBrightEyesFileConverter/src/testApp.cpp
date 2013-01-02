@@ -136,81 +136,77 @@ void testApp::draw()
 
 void testApp::convertFboFrame( )
 {
+    if ( bPlaying == false ) return ; 
     // a few variables for the pixel mapping
     float dstX = 0.0f ;
     float dstY = 0.0f ;
-    float srcX = 0 ;
-    float srcY = 0 ;
+    float srcX = 0.0f ;
+    float srcY = 0.0f ;
     float pixelCount = 0.0f ;
     
+    //Source and Destination Width and Height
     srcW = fbo.getWidth() ;
     srcH = fbo.getHeight() ;
     dstW = fbo.getWidth() ;
     dstH = fbo.getHeight() ;
     
     ofPixels pix ;
-    pix.allocate( fbo.getWidth() , fbo.getHeight() , 3 ) ;
+    pix.allocate( fbo.getWidth() , fbo.getHeight() , GL_RGB ) ;
     
-    fbo.readToPixels( pix ) ;
+    pix = movie.getPixelsRef() ; 
+    //fbo.readToPixels( pix ) ;
     
-    //Source and Destination Width and Height , I recommend making them the same.
-    srcW = fbo.getWidth() ;
-    srcH = fbo.getHeight() ;
-    dstW = fbo.getWidth() ;
-    dstH = fbo.getHeight() ;
-   
     
     // one LED at a time
     for(int j=0; j<numLeds; j++)
     {
         // reset the accumulator and pixel counter
+        float totalBrightness = 0.0;
         pixelCount = 0.0;
-        
-        int numPixels = 0 ;
-        float totalBrightness = 0.0f ;
-        
-        //cout << " led @ " << j << endl ;
         // run through each pixel in the LED rectangle
-        int maxX = nodes[j].area.x + nodes[j].area.width ; 
-        for( int l = nodes[j].area.x ; l <= maxX ; l++ )
+        for(int l = nodes[j].leftX; l <= nodes[j].rightX; l++)
         {
             // extract destination X and calculate source X in movie
             dstX = l;
             srcX = (dstX/dstW)*srcW;
-            
-            int maxY = nodes[j].area.y + nodes[j].area.height ;
-            for( int m = nodes[j].area.y; m <= maxY ; m++ )
+            for(int m = nodes[j].topY; m <= nodes[j].bottomY; m++)
             {
                 // extract destination Y and calculate source Y in movie
                 dstY = m;
                 srcY = (dstY/dstH)*srcH;
+                
                 ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
                 float brightness = (col.r + col.g + col.b) / 3.0f ;
                 //cout << "brightness : " << brightness << " srcX : " << srcX << " srcY " << srcY << endl ;
                 totalBrightness += brightness ;
                 nodes[ j ].brightness = brightness ;
-                
-                pixelCount += 3.0; // account for three pixels, one each of R, G, B
-                
             }
-            
-            numPixels++ ;
         }
-        //cout << "totalBrightness : " << totalBrightness << " / numPixels " << numPixels << endl ;
+        if ( bConverting == true )
+        {
+            // write the average greyscale value across the rectangle to the output array
+            outputArray.push_back( (unsigned char)( totalBrightness ) ) ;
+        }
+    }
+    /*
+           //cout << "totalBrightness : " << totalBrightness << " / numPixels " << numPixels << endl ;
         float _brightness = ( totalBrightness ) / (float) numPixels ;
         if ( _brightness > maxBrightness )
             _brightness = maxBrightness ;
         nodes[ j ].brightness = _brightness ; 
-        
-        if ( bConverting == true )
-        {
-            // write the average greyscale value across the rectangle to the output array
-            outputArray.push_back( (unsigned char)(totalBrightness/pixelCount) ) ;
-        }
-    }
+       */ 
+    
 
 }
 
+/*
+ ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
+ float brightness = (col.r + col.g + col.b) / 3.0f ;
+ //cout << "brightness : " << brightness << " srcX : " << srcX << " srcY " << srcY << endl ;
+ totalBrightness += brightness ;
+ nodes[ j ].brightness = brightness ;
+
+ */
 
 
 //--------------------------------------------------------------
