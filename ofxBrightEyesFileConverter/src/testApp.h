@@ -6,6 +6,8 @@
  
  it's totally awesome and you should get one.
  
+ http://technologywillsaveus.org/
+ https://github.com/twsu/brighteyes
  */
 
 #pragma once
@@ -48,20 +50,19 @@ class testApp : public ofBaseApp
         string videoPath ;
         bool bPlaying ;
         bool bConverting ;
-        float movFrameRate ;
-        int numFrames ;
+        int currentFrame ;
     
         //LED Mapping information
         int mapWidth ;
         int mapHeight ;
         int numLeds ;
-        int headerLen ;
         float dstW;
         float dstH;
         float srcW;
         float srcH;
     
         //The LEDs are awfully bright in a darkly lit environments
+        //sometimes it's better to be a little less bright
         float maxBrightness ;
     
         //Header string for the data file
@@ -69,10 +70,11 @@ class testApp : public ofBaseApp
         //Output array for conversion
         vector<unsigned char> outputArray ;
          
-        //OfBuffer allows us to write to files
+        //ofBuffer allows us to write data out to text files
         ofBuffer buffer ;
     
         //We write either a movie or other pixel data to a Frame Buffer Object
+        //as our primary input source
         ofFbo fbo ;
     
         //Debug string of the current status
@@ -80,6 +82,8 @@ class testApp : public ofBaseApp
     
         //in and out for each movie
         float movieMin , movieMax ;
+        ofRectangle timelineRect ;
+        void checkTimelineInput( ofPoint mouse ) ;
 
     
         

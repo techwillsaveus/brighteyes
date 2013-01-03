@@ -10,15 +10,13 @@ void testApp::setup()
     //setup and intialize all the values we need
     bPlaying = false ;
     bConverting = false ;
-    movFrameRate = 30 ;
-    numFrames = 0 ;
-    
+    currentFrame = 0 ;
     mapWidth = 0;
     mapHeight = 0;
     numLeds = 174;
-    headerLen = 16;
     header = "TWSU-BRIGHT-EYES" ; 
-    ofSetFrameRate( 60 ) ;
+    movieMin = 0.0f;
+    movieMax = 1.0f ;
 
     //Load out XML setup and positions
     ofxXmlSettings xml ;
@@ -41,28 +39,39 @@ void testApp::setup()
         nodes.push_back( node ) ;
     }
     
-    currentStatus = " app initialized ! " ;
+    currentStatus = "app initialized ! " ;
     
-    fbo.allocate( INPUT_WIDTH , INPUT_HEIGHT, GL_RGB ) ;
+    fbo.allocate( INPUT_WIDTH , INPUT_HEIGHT, GL_RGBA ) ;
     fbo.begin() ;
         ofClear( 0 , 0 , 0 ) ;
     fbo.end( );
     videoPath = "default" ;
-    maxBrightness = 255.0f ; 
+    maxBrightness = 255.0f ;
+    timelineRect = ofRectangle( 75 , 5 , fbo.getWidth() , 35 ) ;
+        
+    ofBackground( 100 , 100 , 100 ) ;
+    ofSetVerticalSync( true ) ;
+    ofSetWindowTitle( "Bright Eyes LED Data Tool" ) ; 
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-    movie.update( ) ;
-    
+    //Convert the frame to update the LED display, even if not writing to file
     convertFboFrame() ;
     //If we are using a movie we stop when the movie is done playing
-    if ( bPlaying == true && movie.getIsMovieDone() == true )
+    if ( bPlaying == true && movie.getPosition() >= movieMax )
     {
-        endConversion( ) ;
+        if ( bConverting == true )
+            endConversion( ) ;
+        else
+        {
+            movie.setPosition( movieMin ) ;
+            movie.play( ) ; 
+        }
     }
    
+    movie.update( ) ;
 }
 
 //--------------------------------------------------------------
@@ -70,15 +79,29 @@ void testApp::draw()
 {
         ofPushMatrix() ;
         //Give the render a little padding
-        ofTranslate( 75 , 25 ) ;
+        ofTranslate( 75 , 5 ) ;
+    
+        //Draw the movie timeline
+        float barWidth = 10.0f ;
+        ofPushStyle() ; 
+            //Draw a rectangle at the between the min and max frames
+            ofSetColor( 255 ) ;
+            ofRect( 0 , 0 , timelineRect.width , timelineRect.height ) ;
+            ofSetColor( 0 , 212 , 0 ) ;
+            ofRect( movieMin * timelineRect.width - barWidth/2 , 0, barWidth, timelineRect.height ) ;
+            ofRect( movieMax * timelineRect.width - barWidth/2 , 0, barWidth, timelineRect.height ) ;
+            ofSetLineWidth( 4 ) ;
+            ofLine(  movieMin * timelineRect.width , timelineRect.height / 2.0f ,  movieMax * timelineRect.width , timelineRect.height / 2 ) ;
+        ofPopStyle() ;
+        
+        ofTranslate( 0 , timelineRect.height + 30 ) ;
         ofPushMatrix() ;
-           
+           ofDrawBitmapStringHighlight("source area:" , 4 , -8 ) ;
             fbo.begin() ;
             ofSetColor( 0 , 0 , 0 ) ;
             ofRect( 0 , 0 , ofGetWidth() , ofGetHeight() ) ;
-            
             ofSetColor( 255 , 255 , 255 ) ;
-            //If the movie is playing record that to the FBO
+            //If the movie is playing draw that to the FBO
             if ( bPlaying == true )
             {
                 movie.draw( 0 , 0 ) ;
@@ -86,15 +109,13 @@ void testApp::draw()
             //Otherwise just draw something with OF
             else
             {
-                /*
                 //Opposite circles
-                float offset = fbo.getWidth() / 3.0f ;
                 float height = fbo.getHeight() / 2.0f ;
-                ofCircle( offset , height  , sin ( ofGetElapsedTimef() ) * 125 ) ;
-                ofCircle( offset * 2 , height  , cos ( ofGetElapsedTimef() ) * 125 ) ;
-                 */
-                
-                //Eyelids opening
+                ofCircle( 140 , height  , sin ( ofGetElapsedTimef() ) * 130 ) ;
+                ofCircle( 500 , height  , cos ( ofGetElapsedTimef() ) * 130 ) ;
+                 
+                /*
+                //Split opening
                 float h = fbo.getHeight() / 2 ;
                 ofTranslate( 0 , h ) ;
                 ofSetColor( 255 , 255 , 255 ) ;
@@ -102,17 +123,19 @@ void testApp::draw()
                 ofSetRectMode( OF_RECTMODE_CENTER  ) ;
                 ofRect( 0 , 0 , curWidth * 2 , fbo.getHeight() ) ;
                 ofSetRectMode( OF_RECTMODE_CORNER  ) ;
-                
+                */
             }
             fbo.end() ;
             ofSetColor( 255 , 255 , 255 ) ;
             fbo.draw( 0 , 0 ) ;
         ofPopMatrix() ;
     
-        ofSetColor( 255 , 255 , 255 ) ;
         ofEnableAlphaBlending() ;
         //Draw the LEDs
         ofTranslate( 0 , 240 ) ;
+        ofDrawBitmapStringHighlight("LED Map:" , 4 , -2 ) ;
+    
+        ofSetColor( 255 , 255 , 255 ) ;
         for ( int i = 0 ; i <  nodes.size() ; i++ )
         {
             nodes[ i ].draw( ) ;
@@ -120,23 +143,24 @@ void testApp::draw()
     ofPopMatrix() ;
     
     //Create our instructions string
-    string instructions = "C - is converting : " + ofToString( bConverting) ;
+    string instructions = "C - is converting : " + ofToString( bConverting ) ;
     if ( bConverting == true )
     {
-        instructions += " converting frame : " + ofToString( movie.getCurrentFrame() ) + " of " + ofToString( movie.getTotalNumFrames() )  + " to file : ";
+        int maxFrame = 300 ; 
+        if ( bPlaying == true )
+            maxFrame = movieMax * (float)movie.getTotalNumFrames() ;
+        instructions += " converting frame : " + ofToString( currentFrame ) + " of " + ofToString( (int)maxFrame ) ;
     }
     
     instructions += "\nO - open file\nS - save file" ;
-    if ( bPlaying == true ) 
-    instructions += "\n" + currentStatus ;
+    instructions += "\n< / > MAX Brightness: " + ofToString( maxBrightness ) +"\n" + currentStatus ;
     
-    ofDrawBitmapStringHighlight( instructions , ofPoint( 15 , ofGetHeight() - 45 ) ) ;
+    ofDrawBitmapStringHighlight( instructions , ofPoint( 15 , ofGetHeight() - 65 ) ) ;
 
 }
 
 void testApp::convertFboFrame( )
 {
-    if ( bPlaying == false ) return ; 
     // a few variables for the pixel mapping
     float dstX = 0.0f ;
     float dstY = 0.0f ;
@@ -149,14 +173,12 @@ void testApp::convertFboFrame( )
     srcH = fbo.getHeight() ;
     dstW = fbo.getWidth() ;
     dstH = fbo.getHeight() ;
-    
+
+    //Create an ofPixels object to copy the FBO data into
     ofPixels pix ;
-    pix.allocate( fbo.getWidth() , fbo.getHeight() , GL_RGB ) ;
-    
-    pix = movie.getPixelsRef() ; 
-    //fbo.readToPixels( pix ) ;
-    
-    
+    pix.allocate( fbo.getWidth() , fbo.getHeight() , GL_RGBA ) ;
+    fbo.readToPixels( pix ) ;
+
     // one LED at a time
     for(int j=0; j<numLeds; j++)
     {
@@ -171,43 +193,27 @@ void testApp::convertFboFrame( )
             srcX = (dstX/dstW)*srcW;
             for(int m = nodes[j].topY; m <= nodes[j].bottomY; m++)
             {
-                // extract destination Y and calculate source Y in movie
+                // extract the color from X / Y in the FBO
                 dstY = m;
                 srcY = (dstY/dstH)*srcH;
-                
                 ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
                 float brightness = (col.r + col.g + col.b) / 3.0f ;
-                //cout << "brightness : " << brightness << " srcX : " << srcX << " srcY " << srcY << endl ;
+                //Apply a limit to the brightness value if so desired
+                if ( brightness > maxBrightness )
+                    brightness = maxBrightness ;
                 totalBrightness += brightness ;
                 nodes[ j ].brightness = brightness ;
+                pixelCount++ ;
             }
         }
         if ( bConverting == true )
         {
             // write the average greyscale value across the rectangle to the output array
-            outputArray.push_back( (unsigned char)( totalBrightness ) ) ;
+            outputArray.push_back( (unsigned char)( totalBrightness )/ pixelCount ) ;
         }
     }
-    /*
-           //cout << "totalBrightness : " << totalBrightness << " / numPixels " << numPixels << endl ;
-        float _brightness = ( totalBrightness ) / (float) numPixels ;
-        if ( _brightness > maxBrightness )
-            _brightness = maxBrightness ;
-        nodes[ j ].brightness = _brightness ; 
-       */ 
-    
-
+    if ( bConverting == true ) currentFrame++ ;
 }
-
-/*
- ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
- float brightness = (col.r + col.g + col.b) / 3.0f ;
- //cout << "brightness : " << brightness << " srcX : " << srcX << " srcY " << srcY << endl ;
- totalBrightness += brightness ;
- nodes[ j ].brightness = brightness ;
-
- */
-
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
@@ -216,6 +222,20 @@ void testApp::keyPressed(int key){
     //Handle the key inputs
     switch ( key )
     {
+            
+        //lessthan
+        case 44:
+            maxBrightness--;
+            if( maxBrightness < 0 ) maxBrightness = 0 ;
+            break ;
+            
+        //greaterthan
+        case 46 :
+            maxBrightness++;
+            if( maxBrightness > 255 ) maxBrightness = 255 ;
+            break ;
+            break ;
+            
         case 'o':
         case 'O':
             openMovie( ) ;
@@ -245,16 +265,18 @@ void testApp::startConversion( )
     //Set up all our values
     bConverting = true ;
     outputArray.clear() ;
-    movie.firstFrame() ;
+    movie.setPosition( movieMin ) ;
+    movie.update() ;
     movie.play() ;
+    currentFrame = movie.getCurrentFrame() ; 
     
     // place the header at the top of the output array
-    for(int i=0; i<headerLen; i++)
+    for(int i=0; i< header.size() ; i++)
     {
         outputArray.push_back( (unsigned char)  header.at(i) ) ;
     }
     
-    currentStatus = " starting conversion process! " ;
+    currentStatus = "starting conversion process! hit C again to end recording" ;
 }
 
 void testApp::endConversion()
@@ -300,29 +322,46 @@ void testApp::endConversion()
 
 void testApp::openMovie( )
 {
-    ofFileDialogResult result = ofSystemLoadDialog( "pick movie" , false ) ;
+    ofFileDialogResult result = ofSystemLoadDialog( "pick a movie" , false ) ;
     
     if ( result.bSuccess == true )
     {
-        cout << "name :" << result.getName() << endl ;
-        cout << "file path: " << result.getPath() << endl ;
+        //cout << "name :" << result.getName() << endl ;
+        //cout << "file path: " << result.getPath() << endl ;
         movie.loadMovie( result.getPath() ) ;
         movie.setLoopState(OF_LOOP_NONE) ;
-        movieMin = 0.0f;
-        movieMax = 1.0f ; 
-        movie.firstFrame() ;
+        float movieFPS = (float)movie.getTotalNumFrames() / movie.getDuration() ; 
+        ofSetFrameRate( movieFPS ) ; 
+        movie.setPosition( movieMin ) ; 
         movie.play() ;
-        numFrames = movie.getTotalNumFrames();
-        int outputFileSize = headerLen + ( numFrames * numLeds ) ; 
         videoPath = result.getName() ;
         videoPath = videoPath.substr( 0 , videoPath.size() - 4 ) ;
-        cout << "videoPath : " << videoPath << endl ;
-        currentStatus = videoPath + " was loaded correctly! " ;
+        //cout << "videoPath : " << videoPath << endl ;
+        currentStatus = "'" +videoPath + "'" + " loaded OK! Click on the timeline to set the in / outs for seemless looping" ;
         bPlaying = true ; 
     }
     else
     {
-        currentStatus = " movie could NOT be LOADED " ;
+        currentStatus = " movie could NOT be LOADED :( " ;
+    }
+}
+
+void testApp::checkTimelineInput( ofPoint mouse )
+{
+    //If a user clicks within the timeline area
+    if ( bPlaying == true  && timelineRect.inside( mouse ) == true )
+    {
+        mouse.x -= timelineRect.x ;
+        mouse.y -= timelineRect.y ;
+        //Map the drag to be between 0 and 1
+        float normalizedClick = ofMap ( mouse.x , 0 , timelineRect.width , 0.0f , 1.0f ) ;
+        //check the distance and adjust the min / max video mapping
+        float minDist = mouse.distance( ofVec2f( movieMin*timelineRect.width , timelineRect.height/2 ) ) ;
+        float maxDist = mouse.distance( ofVec2f( movieMax*timelineRect.width , timelineRect.height/2 ) ) ;
+        if ( minDist < maxDist )
+            movieMin = normalizedClick ;
+        else
+            movieMax = normalizedClick ;
     }
 }
 
@@ -333,22 +372,22 @@ void testApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button){
-
+    checkTimelineInput( ofPoint ( x , y ) ) ;
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
-
+    checkTimelineInput( ofPoint ( x , y ) ) ;
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
-
+    checkTimelineInput( ofPoint ( x , y ) ) ;
 }
 
 //--------------------------------------------------------------
