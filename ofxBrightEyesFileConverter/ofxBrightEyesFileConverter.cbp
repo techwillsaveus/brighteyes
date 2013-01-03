@@ -1,8 +1,8 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="emptyExample" />
+		<Option title="ofxBrightEyesFileConverter" />
 		<Option makefile="makefile" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
@@ -68,6 +68,8 @@
 			<Add directory="..\..\..\libs\tess2\include" />
 			<Add directory="..\..\..\libs\cairo\include\cairo" />
 			<Add directory="src" />
+			<Add directory="..\..\..\addons\ofxXmlSettings\src" />
+			<Add directory="..\..\..\addons\ofxXmlSettings\libs" />
 		</Compiler>
 		<Linker>
 			<Add library="..\..\..\libs\FreeImage\lib\win_cb\FreeImage.lib" />
@@ -106,10 +108,16 @@
 			<Add library="Comdlg32" />
 		</Linker>
 		<ExtraCommands>
-			<Add after="xcopy /e /i /y &quot;$(PROJECT_DIR)..\..\..\export\win_cb\*.dll&quot;  &quot;$(PROJECT_DIR)bin&quot;" />
-			<Add after="cmd /c if not exist &quot;$(PROJECT_DIR)bin/data&quot; mkdir &quot;$(PROJECT_DIR)bin/data&quot;" />
+			<Add after='xcopy /e /i /y &quot;$(PROJECT_DIR)..\..\..\export\win_cb\*.dll&quot;  &quot;$(PROJECT_DIR)bin&quot;' />
+			<Add after='cmd /c if not exist &quot;$(PROJECT_DIR)bin/data&quot; mkdir &quot;$(PROJECT_DIR)bin/data&quot;' />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="..\..\..\addons\ofxXmlSettings\libs\tinyxml.cpp" />
+		<Unit filename="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h" />
+		<Unit filename="..\..\..\addons\ofxXmlSettings\libs\tinyxmlerror.cpp" />
+		<Unit filename="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp" />
+		<Unit filename="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.cpp" />
+		<Unit filename="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.h" />
 		<Unit filename="src\main.cpp">
 			<Option virtualFolder="src" />
 		</Unit>
