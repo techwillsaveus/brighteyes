@@ -47,7 +47,7 @@ class testApp : public ofBaseApp
         
         //Movie Info
         ofVideoPlayer movie ;
-        string videoPath ;
+        string dataSavePath ;
         bool bPlaying ;
         bool bConverting ;
         int currentFrame ;
@@ -63,7 +63,7 @@ class testApp : public ofBaseApp
     
         //The LEDs are awfully bright in a darkly lit environments
         //sometimes it's better to be a little less bright
-        float maxBrightness ;
+        float brightnessFactor ;
     
         //Header string for the data file
         string header ;
@@ -85,6 +85,7 @@ class testApp : public ofBaseApp
         ofRectangle timelineRect ;
         void checkTimelineInput( ofPoint mouse ) ;
 
-    
-        
+        ofxXmlSettings brightnessXml ;
+        ofPoint drawOffset ; 
+        ofPoint sizeOffset ; 
 };

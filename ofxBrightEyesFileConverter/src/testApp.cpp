@@ -18,6 +18,10 @@ void testApp::setup()
     movieMin = 0.0f;
     movieMax = 1.0f ;
 
+    
+    brightnessXml.loadFile("brightness.xml" ) ; 
+    brightnessFactor = brightnessXml.getValue("maxBrightness", 1.0f ) ;
+    
     //Load out XML setup and positions
     ofxXmlSettings xml ;
     xml.loadFile( "bright-eyes-coords.xml" ) ;
@@ -45,8 +49,6 @@ void testApp::setup()
     fbo.begin() ;
         ofClear( 0 , 0 , 0 ) ;
     fbo.end( );
-    videoPath = "default" ;
-    maxBrightness = 255.0f ;
     timelineRect = ofRectangle( 75 , 5 , fbo.getWidth() , 35 ) ;
         
     ofBackground( 100 , 100 , 100 ) ;
@@ -80,6 +82,7 @@ void testApp::draw()
         ofPushMatrix() ;
         //Give the render a little padding
         ofTranslate( 75 , 5 ) ;
+        
     
         //Draw the movie timeline
         float barWidth = 10.0f ;
@@ -96,11 +99,15 @@ void testApp::draw()
         
         ofTranslate( 0 , timelineRect.height + 30 ) ;
         ofPushMatrix() ;
+            
            ofDrawBitmapStringHighlight("source area:" , 4 , -8 ) ;
             fbo.begin() ;
+            ofScale ( ( fbo.getWidth() + sizeOffset.x ) / fbo.getWidth() , ( fbo.getHeight() + + sizeOffset.y ) / fbo.getHeight() ) ;
+            ofTranslate( drawOffset ) ;
             ofSetColor( 0 , 0 , 0 ) ;
             ofRect( 0 , 0 , ofGetWidth() , ofGetHeight() ) ;
             ofSetColor( 255 , 255 , 255 ) ;
+            
             //If the movie is playing draw that to the FBO
             if ( bPlaying == true )
             {
@@ -109,25 +116,28 @@ void testApp::draw()
             //Otherwise just draw something with OF
             else
             {
+                /*
                 //Opposite circles
                 float height = fbo.getHeight() / 2.0f ;
-                ofCircle( 140 , height  , sin ( ofGetElapsedTimef() ) * 130 ) ;
-                ofCircle( 500 , height  , cos ( ofGetElapsedTimef() ) * 130 ) ;
-                 
-                /*
+                ofCircle( 140 , height  , sin ( ofGetElapsedTimef() * 2 ) * 140 ) ;
+                ofCircle( 500 , height  , cos ( ofGetElapsedTimef() * 2 ) * 140 ) ;
+                 */
+
                 //Split opening
-                float h = fbo.getHeight() / 2 ;
-                ofTranslate( 0 , h ) ;
+                float w = fbo.getHeight() / 2 ;
+                ofTranslate( 0 , w ) ;
                 ofSetColor( 255 , 255 , 255 ) ;
-                float curWidth = sin ( ofGetElapsedTimef() ) * ofGetWidth() ;
+                float curWidth = sin ( ofGetElapsedTimef() ) * ( ofGetWidth() /2) ;
                 ofSetRectMode( OF_RECTMODE_CENTER  ) ;
-                ofRect( 0 , 0 , curWidth * 2 , fbo.getHeight() ) ;
+                ofRect( 140, 0 , curWidth , fbo.getHeight()  ) ;
+                ofRect( 500, 0 , curWidth , fbo.getHeight()  ) ;
                 ofSetRectMode( OF_RECTMODE_CORNER  ) ;
-                */
+
+                
             }
             fbo.end() ;
             ofSetColor( 255 , 255 , 255 ) ;
-            fbo.draw( 0 , 0 ) ;
+            fbo.draw( 0 , 0 , fbo.getWidth() + sizeOffset.x , fbo.getHeight() + sizeOffset.y ) ;
         ofPopMatrix() ;
     
         ofEnableAlphaBlending() ;
@@ -152,10 +162,12 @@ void testApp::draw()
         instructions += " converting frame : " + ofToString( currentFrame ) + " of " + ofToString( (int)maxFrame ) ;
     }
     
-    instructions += "\nO - open file\nS - save file" ;
-    instructions += "\n< / > MAX Brightness: " + ofToString( maxBrightness ) +"\n" + currentStatus ;
-    
-    ofDrawBitmapStringHighlight( instructions , ofPoint( 15 , ofGetHeight() - 65 ) ) ;
+    instructions += "\nO - open file" ;
+    instructions += "\n< / > Brightness Factor : " + ofToString( brightnessFactor ) ;
+    instructions += "\nARROW keys nudge the area " ;
+    instructions += "\nW,A,S,D affect the scaling. ScaleX - " + ofToString( (fbo.getWidth() + sizeOffset.x) / fbo.getWidth() ) + " , ScaleY - " + ofToString( (fbo.getHeight() + sizeOffset.y ) / fbo.getHeight() ) ;
+    instructions += "\nstatus: " + ofToString( currentStatus ) ; 
+    ofDrawBitmapStringHighlight( instructions , ofPoint( 15 , ofGetHeight() - 125 ) ) ;
 
 }
 
@@ -178,7 +190,9 @@ void testApp::convertFboFrame( )
     ofPixels pix ;
     pix.allocate( fbo.getWidth() , fbo.getHeight() , GL_RGBA ) ;
     fbo.readToPixels( pix ) ;
-
+    
+   // if ( bPlaying == true )
+   //     pix = movie.getPixelsRef()  ;
     // one LED at a time
     for(int j=0; j<numLeds; j++)
     {
@@ -198,18 +212,19 @@ void testApp::convertFboFrame( )
                 srcY = (dstY/dstH)*srcH;
                 ofColor col = pix.getColor( (int)srcX, (int)srcY ) ;
                 float brightness = (col.r + col.g + col.b) / 3.0f ;
-                //Apply a limit to the brightness value if so desired
-                if ( brightness > maxBrightness )
-                    brightness = maxBrightness ;
-                totalBrightness += brightness ;
-                nodes[ j ].brightness = brightness ;
+                totalBrightness += brightness ; 
                 pixelCount++ ;
             }
         }
+        
+        float _bright = totalBrightness / pixelCount ;
+        _bright *= brightnessFactor ; 
+        nodes[ j ].brightness = _bright ;
+        
         if ( bConverting == true )
         {
             // write the average greyscale value across the rectangle to the output array
-            outputArray.push_back( (unsigned char)( totalBrightness )/ pixelCount ) ;
+            outputArray.push_back( _bright ) ;
         }
     }
     if ( bConverting == true ) currentFrame++ ;
@@ -218,22 +233,42 @@ void testApp::convertFboFrame( )
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
     
-    //cout << "keyPressed :: " << key << endl ;
+    //drawOffset
+    cout << "keyPressed :: " << key << endl ;
     //Handle the key inputs
     switch ( key )
     {
             
+        case 356:
+            drawOffset.x -= 1 ;
+            break ;
+            
+        case 357:
+            drawOffset.y -= 1 ;
+            break ;
+            
+        case 358:
+            drawOffset.x += 1 ;
+            break ;
+            
+        case 359:
+            drawOffset.y +=1 ;
+            break ;
+            
         //lessthan
         case 44:
-            maxBrightness--;
-            if( maxBrightness < 0 ) maxBrightness = 0 ;
+            brightnessFactor -= 0.1 ;
+            if( brightnessFactor < 0 ) brightnessFactor = 0 ;
+            brightnessXml.setValue("maxBrightness", brightnessFactor ) ;
+            brightnessXml.saveFile("brightness.xml" ) ;
             break ;
             
         //greaterthan
         case 46 :
-            maxBrightness++;
-            if( maxBrightness > 255 ) maxBrightness = 255 ;
-            break ;
+            brightnessFactor += 0.1 ;
+            if( brightnessFactor > 1 ) brightnessFactor = 1 ;
+            brightnessXml.setValue("maxBrightness", brightnessFactor ) ;
+            brightnessXml.saveFile("brightness.xml" ) ;
             break ;
             
         case 'o':
@@ -254,6 +289,28 @@ void testApp::keyPressed(int key){
             }
             break ;
             
+        case 'w':
+        case 'W':
+            sizeOffset.y -= 1 ;
+            break ;
+            
+        case 's':
+        case 'S':
+            sizeOffset.y += 1 ;
+            break ;
+            
+        case 'a':
+        case 'A':
+            sizeOffset.x -= 1 ;
+            break ;
+            
+        case 'd':
+        case 'D':
+            sizeOffset.x += 1 ;
+            break ;
+            
+        
+            
         default :
             break ;
             
@@ -262,6 +319,15 @@ void testApp::keyPressed(int key){
 
 void testApp::startConversion( )
 {
+    ofFileDialogResult bResult = ofSystemSaveDialog( "default" , "name OUTPUT FILE" ) ;
+    if ( bResult.bSuccess )
+    {
+        dataSavePath = bResult.getName() ;
+    }
+    else
+    {
+        dataSavePath = "default" ; 
+     }
     //Set up all our values
     bConverting = true ;
     outputArray.clear() ;
@@ -283,7 +349,7 @@ void testApp::endConversion()
 {
     //Everything has been written! Now let's output a file
     // first generate a file name
-    string fileName = videoPath + ".dat" ;
+    string fileName = dataSavePath + ".dat" ;
     
     //create the ofFile
     ofFile dataFile = ofFile(  ) ;
@@ -312,7 +378,7 @@ void testApp::endConversion()
     dataFile.close() ;
     bool fileWritten = ofBufferToFile( fileName , buffer ) ;
     //Check if the file was written correctly
-    cout << "was the file written to : " << fileName << " : ? " << fileWritten << endl ;
+    //cout << "was the file written to : " << fileName << " : ? " << fileWritten << endl ;
     if ( fileWritten == true )
         currentStatus = " file was written OK! to : " + fileName ;
     else
@@ -334,7 +400,7 @@ void testApp::openMovie( )
         ofSetFrameRate( movieFPS ) ; 
         movie.setPosition( movieMin ) ; 
         movie.play() ;
-        videoPath = result.getName() ;
+        string videoPath = result.getName() ;
         videoPath = videoPath.substr( 0 , videoPath.size() - 4 ) ;
         //cout << "videoPath : " << videoPath << endl ;
         currentStatus = "'" +videoPath + "'" + " loaded OK! Click on the timeline to set the in / outs for seemless looping" ;

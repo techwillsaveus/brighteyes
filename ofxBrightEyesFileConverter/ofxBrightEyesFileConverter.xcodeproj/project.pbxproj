@@ -497,7 +497,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = ofxBrightEyesFileConverterDebug;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx10.6;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -584,7 +584,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = ofxBrightEyesFileConverter;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx10.6;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

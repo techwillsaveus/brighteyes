@@ -38,11 +38,14 @@ class LEDNode
     
         void draw( )
         {
+            ofEnableSmoothing() ; 
             //Draw a simple rectangle with the brightness of the LED
-            ofSetColor( 0 , 0 , 0 ) ;
-            ofSetLineWidth( 3 ) ;
+            ofNoFill( ) ;
+            ofSetColor( 255 ) ;
+            ofSetLineWidth( 2 ) ;
             ofRect( area ) ;
 
+            ofFill( ) ; 
             ofSetLineWidth( 1 ) ;
             ofSetColor( brightness , brightness , brightness , 255 ) ;
             ofRect( area ) ;
