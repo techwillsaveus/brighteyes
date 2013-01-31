@@ -24,8 +24,8 @@ Usage
 * Use the '=' key to add a blank frame
 * Use the '+' key to copy the current frame at the end of the timeline
 * Use the '-' key to delete the current frame
-* Use ALT+C to copy the current frame in memory
-* Use the ALT+V to paste a frame from memory in the current frame
+* Use ALT+c to copy the current frame in memory
+* Use the ALT+v to paste a frame from memory in the current frame
 
 #Dealing with files
 * Use 'n' to start from scratch(clear everything)
