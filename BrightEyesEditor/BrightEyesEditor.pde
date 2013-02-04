@@ -157,6 +157,14 @@ void keyPressed(){
   }
   if(key == 'A' || key == 'S' || key == 'D' || key == 'W') setStatus("brush size changed",1);//fix brush size in LED unit
   if(key == 'b' || key == 'B') setStatus("new brush brightness : " + brightness, 1);
+  if(checkKey(ALT) && checkKey(KeyEvent.VK_F1)) {
+    setStatus("brigthness decreased on all frames by 5", 1);
+    for(int i = 0 ; i < frames.size(); i++) for(int j = 0; j < numLeds; j++) if(frames.get(i)[j] > 0) frames.get(i)[j] = constrain(frames.get(i)[j]-5,0,255);
+  }
+  if(checkKey(ALT) && checkKey(KeyEvent.VK_F2)) {
+    setStatus("brigthness increased on all frames by 5", 1);
+    for(int i = 0 ; i < frames.size(); i++) for(int j = 0; j < numLeds; j++) if(frames.get(i)[j] > 0) frames.get(i)[j] = constrain(frames.get(i)[j]+5,0,255);
+  }
 }
 void keyReleased(){
   keys[keyCode] = false;
@@ -216,7 +224,7 @@ void drawHelp(){
   rect(pad,pad,width-pad*2,height-pad*2);
   String help = "Welcome to the BrightEyes Editor\nPaint:\nClick and Drag to paint LEDs white/on\nSHIFT+Click and Drag to erase/paint LEDs black/off\n";
   help += "ALT+Click and Drag to control the fade/brightness of an LED.\nUse 'W'/'S' to increase/decrease brush size vertically and 'D'/'A' to increase/decrease the brush vertically.\n";
-  help += "Use 'B' to increase the brush brigtness and 'b' to decrease it.\nFrame control:\nUse the LEFT/RIGHT cursor keys to navigate the timeline or Drag through the timeline (Shift+Drag to scroll it).\n";
+  help += "Use 'B' to increase the brush brigtness and 'b' to decrease it. ALT+F1/F2 controls brightness on ALL frames.\nFrame control:\nUse the LEFT/RIGHT cursor keys to navigate the timeline or Drag through the timeline (Shift+Drag to scroll it). \n";
   help += "SPACE toggles playback/ '=' adds a blank frame/ '+' copy current frame as last / '-' deletes the current frame/ \n'ALT+c' copies the current frame and 'ALT+v' pastes it/ 'c' clears the current frame\n";
   help += "File:\n'n' clears everything(new document)/ 's' saves the current document/ drag a .dat file to open an animation\n '?' toggles this help panel. Have fun!";
   fill(255);
