@@ -158,12 +158,14 @@ void keyPressed(){
   if(key == 'A' || key == 'S' || key == 'D' || key == 'W') setStatus("brush size changed",1);//fix brush size in LED unit
   if(key == 'b' || key == 'B') setStatus("new brush brightness : " + brightness, 1);
   if(checkKey(ALT) && checkKey(KeyEvent.VK_F1)) {
-    setStatus("brigthness decreased on all frames by 5", 1);
-    for(int i = 0 ; i < frames.size(); i++) for(int j = 0; j < numLeds; j++) if(frames.get(i)[j] > 0) frames.get(i)[j] = constrain(frames.get(i)[j]-5,0,255);
+    for(int i = 0 ; i < frames.size(); i++) 
+      for(int j = 0; j < numLeds; j++) 
+        if(frames.get(i)[j] > 0) frames.get(i)[j] = constrain(frames.get(i)[j]-5,0,255);
+    setStatus("brightness decreased on all frames by 5", 1);
   }
   if(checkKey(ALT) && checkKey(KeyEvent.VK_F2)) {
-    setStatus("brigthness increased on all frames by 5", 1);
     for(int i = 0 ; i < frames.size(); i++) for(int j = 0; j < numLeds; j++) if(frames.get(i)[j] > 0) frames.get(i)[j] = constrain(frames.get(i)[j]+5,0,255);
+    setStatus("brightness increased on all frames by 5", 1);
   }
 }
 void keyReleased(){

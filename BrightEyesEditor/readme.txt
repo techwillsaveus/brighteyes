@@ -15,6 +15,7 @@ Usage
 * Use 'W'/'S' keys to increase/decrease brush size vertically
 * Use 'D'/'A' keys to increase/decrease brush size horizontally
 * Use 'B'/'b' keys to increase/decrease brush brightness
+* Use 'ALT+F1'/'ALT+F2' keys to increase/decrease brightness on ALL active (> 0) LEDs on ALL frames
 
 #Frame control
 * Use the LEFT/RIGHT cursor keys to navigate the timeline.
