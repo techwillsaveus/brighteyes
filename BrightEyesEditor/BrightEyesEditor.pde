@@ -3,6 +3,8 @@
  * Preview and create binary .dat files for the Bright Eyes kit from TWSU
  * (c) George Profenza 2012 for TWSU
  */
+import java.util.Arrays;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 import sojamo.drop.*;
 

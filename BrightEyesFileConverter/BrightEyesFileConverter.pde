@@ -15,6 +15,7 @@
 import processing.video.*;
 import gifAnimation.*;
 import sojamo.drop.*;
+import java.io.File;
 
 MediaManager media;
 boolean playing = false;
@@ -48,15 +49,23 @@ String outputFileName;
 final String header = "TWSU-BRIGHT-EYES";
 
 // GUI
-PImage glasses;
 boolean showLeds = false;
 boolean showText = true;
 //drag'n'drop
 SDrop drop;
+//.dat preview
+boolean previewMode = false;
+boolean autoUpdate = true;
+int previewFrame = 0;
+int numPreviewFrames;
+ArrayList<int[]> dframes = new ArrayList<int[]>();
+//status
+int currentStatusFrames=0,totalStatusFrames = 0;
+String status = "";
+
 
 void setup() 
 {
-  glasses = loadImage(dataPath("glassesr.png"));
   // create output array based on number of frames and header
   setupCoords();
   
@@ -79,22 +88,44 @@ void draw() {
   
   // draw the LEDs, if appropriate
   if (showLeds && !converting) {
-    image(glasses,0,0);
+    pushStyle();
+    noStroke();fill(255,64);
+    for(node n : nodes) rect(n.leftX,n.topY,n.rightX-n.leftX,n.bottomY-n.topY);
+    popStyle();
   }
-
+  //draw .dar preview
+  if(previewMode){
+    if(autoUpdate && numPreviewFrames > 1) previewFrame = ((previewFrame+1)%(numPreviewFrames-1));//update frames
+    pushStyle();
+    noStroke();
+    fill(0);rect(0,0,width,height);
+    for(int i = 0 ; i < numLeds; i++){
+      node n = nodes[i];
+      fill(dframes.get(previewFrame)[i]);
+      rect(n.leftX,n.topY,n.rightX-n.leftX,n.bottomY-n.topY);
+    }
+    //for(node n : nodes) rect(n.leftX,n.topY,n.rightX-n.leftX,n.bottomY-n.topY);
+    popStyle();
+  }
   // create the text string, if appropriate
   if (showText) {
     String status = "";
 
     if (converting)   status = "Converting... " + media.progress() + "% complete";
     else if (playing) status = "Playing... " + media.progress() + "% complete";
-    else status = "Drag a media file here to get started.\nPress:\nc to convert\np to play / pause\nr to reset movie to the start\ns to overlay LEDs\na to colour averaging on / off\nt to toggle text on / off";
+    else status = "Drag a media file here to get started.\nPress:\nc to convert\np to play / pause\nr to reset movie to the start\ns to overlay LEDs\na to colour averaging on/off (currently: "+(useAverage ? "ON" : "OFF")+")\nt to toggle text on / off";
     
     // draw the text string
     noStroke();
     fill(255, 0, 0);
     text(status, 10, 20);
   }
+  //status
+  pushStyle();
+  if(currentStatusFrames > 0) currentStatusFrames--;
+  noStroke();fill(127,map(currentStatusFrames,totalStatusFrames,0,255,0));
+  text(status,5,height-3);
+  popStyle();
 }
 
 void keyPressed() {
@@ -164,6 +195,8 @@ void beginConversion() {
 void endConversion() {
   saveToDisk(outputFileName);
   converting = false;
+  setStatus("Conversion Complete! Previewing " + outputFileName,2.5);
+  setupPreview(outputFileName);
 }
 
 byte[] getDMXFrame(PImage frame){
@@ -209,26 +242,59 @@ void saveToDisk(String file){
   converting = false;
 }
 
-void dropEvent(DropEvent theDropEvent) {
-  File f = theDropEvent.file();
+void dropEvent(DropEvent e) {
+  previewMode = false;
+  showText = true;
+  File f = e.file();
   String name = f.getName();
   outputFileName = name+".dat";
   if (f.isDirectory()) media.setImageSequence(this, f);
   else {
-    if (name.endsWith("gif")||name.endsWith("GIF")) media.setGif(this,f.getAbsolutePath());
+    if (name.toLowerCase().endsWith("gif")) media.setGif(this,f.getAbsolutePath());
     else {
-      if ((name.endsWith("jpg")||name.endsWith("JPG"))||
-        (name.endsWith("png")||name.endsWith("PNG"))||
-        (name.endsWith("tga")||name.endsWith("TGA"))||
-        (name.endsWith("bmp")||name.endsWith("BMP"))) media.setImage(f.getAbsolutePath());
-      if ((name.endsWith("mov")||name.endsWith("MOV"))||
-        (name.endsWith("avi")||name.endsWith("AVI"))||
-        (name.endsWith("mpg")||name.endsWith("MPG"))||
-        (name.endsWith("mp4")||name.endsWith("MP4"))||
-        (name.endsWith("flv")||name.endsWith("FLV"))||
-        (name.endsWith("wmv")||name.endsWith("WMV"))||
-        (name.endsWith("3gp")||name.endsWith("3GP"))||
-        (name.endsWith("ogg")||name.endsWith("OGG"))) media.setMovie(this, f.getAbsolutePath());
+      if (name.toLowerCase().endsWith("jpg")||
+          name.toLowerCase().endsWith("png")||
+          name.toLowerCase().endsWith("tga")||
+          name.toLowerCase().endsWith("bmp")) media.setImage(f.getAbsolutePath());
+      if (name.toLowerCase().endsWith("mov")||
+          name.toLowerCase().endsWith("avi")||
+          name.toLowerCase().endsWith("mpg")||
+          name.toLowerCase().endsWith("mp4")||
+          name.toLowerCase().endsWith("flv")||
+          name.toLowerCase().endsWith("wmv")||
+          name.toLowerCase().endsWith("3gp")||
+          name.toLowerCase().endsWith("ogg")) media.setMovie(this, f.getAbsolutePath());
+      if(name.toLowerCase().endsWith("dat")) setupPreview(e.file().getAbsolutePath());
     }
   }
+}
+void setupPreview(String path){
+  playing = converting = false;
+  previewMode = true;
+  noLoop();
+  byte[] data = loadBytes(path);
+  if(data.length <= headerLen) {
+    data = null;
+    frame.setTitle(path+" is an empty file, try another");
+  }else{
+    dframes.clear();//frames.remove(0);
+    numPreviewFrames = ((data.length-headerLen)/numLeds);
+    previewFrame = 0;
+    for(int fr = 0; fr < numPreviewFrames; fr++){
+      int[] ef = new int[numLeds];
+      for (int i = numLeds*fr; i < (numLeds*fr)+numLeds; i++) {
+          int indexFrom = i+headerLen;
+          int indexTo   = indexFrom-(numLeds*fr+headerLen);
+          ef[indexTo] = data[indexFrom];
+      }
+      dframes.add(ef);      
+    }
+  }
+  loop();
+}
+void setStatus(String message,float seconds){
+  int frames = (int)(seconds * 30);
+  currentStatusFrames = frames;
+  totalStatusFrames = frames;
+  status = message; 
 }

@@ -11,6 +11,10 @@ This is where you will find:
 Do check out the READMEs on both the Processing Converter and Arduino SDPlayer for more details.
 This project will be updated very soon to also include more demos and examples.
 
+The converter uses two libraries you should download first if you plan to edit the source:
+<a href="http://www.extrapixel.ch/processing/gifAnimation/">gifAnimation</a><br/>
+<a href="http://www.sojamo.de/libraries/drop/">sDrop</a>
+
 Credits
 ==========
 Converter and SDPlayer code developed by Stefan Dzisiewski-Smith for <a href="http://technologywillsaveus.org/" target="_blank">Technology Will Save Us</a>
