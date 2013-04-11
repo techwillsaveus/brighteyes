@@ -24,7 +24,7 @@ then continue 88 to 174 on the right lens as you can see in the image bellow:<br
 
 For Designers, an SVG with labelled LEDs is available <a href="https://github.com/twsu/brighteyes/blob/master/BrightEyesEditor/data/brighteyes.svg">here</a>
 (alt+click to download)
-
+```
 For Developers, here is a lookup table for reference:
 {0  ,0  ,0  ,1  ,2  ,3  ,4  ,5  ,6  ,7  ,8  ,9  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,88 ,89 ,90 ,91 ,92 ,93 ,94 ,95 ,96 ,0  ,0  ,0  ,
  0  ,10 ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18 ,19 ,20 ,21 ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,97 ,98 ,99 ,100,101,102,103,104,105,106,107,108,0  ,
@@ -33,7 +33,7 @@ For Developers, here is a lookup table for reference:
  52 ,53 ,54 ,55 ,56 ,57 ,58 ,59 ,60 ,61 ,62 ,63 ,64 ,65 ,66 ,0  ,0  ,0  ,0  ,0  ,0  ,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,
  0  ,67 ,68 ,69 ,70 ,71 ,72 ,73 ,74 ,75 ,76 ,77 ,78 ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,154,155,156,157,158,159,160,161,162,163,164,165,0  ,
  0  ,0  ,0  ,79 ,80 ,81 ,82 ,83 ,84 ,85 ,86 ,87 ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,166,167,168,169,170,171,172,173,174,0  ,0  ,0  };
-
+```
 Credits
 ==========
 Converter and SDPlayer code developed by Stefan Dzisiewski-Smith for <a href="http://technologywillsaveus.org/" target="_blank">Technology Will Save Us</a>
