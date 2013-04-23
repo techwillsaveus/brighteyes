@@ -26,5 +26,5 @@ You will be prompted for a filename.
 * Use the 'f'/'F' to cycle through the fonts
 * Fonts are loaded from the data folder of the application so you can create
   more fonts using Tool > Create Fonts in Processing
-
+* Bitmap/Pixel fonts seem to work best. You can find some <a href="http://www.dafont.com/bitmap.php">here</a>
 
