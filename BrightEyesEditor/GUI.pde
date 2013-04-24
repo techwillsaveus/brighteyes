@@ -127,9 +127,16 @@ class GUI implements java.awt.event.ActionListener,javax.swing.event.ChangeListe
   void update(){
     ledBrightness.setValue(editor.brightness);
     loop.setSelected(editor.autoUpdate);
-    timeline.setValue(editor.currentFrame);
-    if(timeline.getMaximum() != editor.totalFrames) timeline.setMaximum(editor.totalFrames-1);
-    help.setSelected(editor.showHelp); 
+    help.setSelected(editor.showHelp);
+    updateTimelineSlider(); 
+  }
+  void updateTimelineSlider(){
+    if(timeline.getMaximum() != editor.totalFrames) {
+      timeline.removeChangeListener(this);
+      timeline.setMaximum(editor.totalFrames-1);
+      timeline.addChangeListener(this);
+    }
+    if(timeline.getValue() != editor.currentFrame) timeline.setValue(editor.currentFrame);
   }
   AbstractButton addButton(String text, Container container,boolean isToggle) {
       AbstractButton button = isToggle ? new JToggleButton(text) : new JButton(text);
@@ -155,19 +162,17 @@ class GUI implements java.awt.event.ActionListener,javax.swing.event.ChangeListe
       editor.currentFrame++;
       timeline.setValue(currentFrame);
     }
-    if(source == addFrame){
+    if(source == addFrame) {
       editor.addFrame();
-      timeline.setMaximum(editor.totalFrames-1);
-      timeline.setValue(editor.totalFrames-1);
+      updateTimelineSlider();
     }
-    if(source == removeFrame && editor.totalFrames > 1){
+    if(source == removeFrame && editor.totalFrames > 1) {
       editor.removeFrame();
-      timeline.setMaximum(editor.totalFrames-1);
+      updateTimelineSlider();
     }
-    if(source == duplicateFrame){
+    if(source == duplicateFrame) {
       editor.cloneFrame();
-      timeline.setMaximum(editor.totalFrames-1);
-      timeline.setValue(editor.totalFrames-1);
+      updateTimelineSlider();
     }
     if(source == clearFrame) editor.clearFrame(); 
     if(source == copyFrame) editor.copyFrame();

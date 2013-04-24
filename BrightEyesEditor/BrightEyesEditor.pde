@@ -18,7 +18,7 @@ String file, header = "TWSU-BRIGHT-EYES";
 int px = 5;//original LED width = 5
 int py = 9;//original LED height = 13
 boolean usePreciseClick = false;
-int brightness = 255;
+int brightness = 192;
 //timeline  
 int currentFrame = 0, totalFrames = 1, frameSkip=3;
 boolean autoUpdate = false, showHelp = true;
@@ -43,11 +43,6 @@ void setup() {
   frames.add(getFrame(0));
   drop = new SDrop(this);
   gui = new GUI(this);
-  frame.setPreferredSize(new Dimension(width,height*3));
-  println(frame.getSize());
-  //frame.add(gui.all);
-  //frame.setResizable(true);
-  frame.setSize(width,height*3);
 }
 void draw() {
   if(frame.getHeight() < height * 3) frame.setPreferredSize(new Dimension(width,height*3));
@@ -237,6 +232,7 @@ void dropEvent(DropEvent e) {
         frames.add(ef);
       }
       showHelp = false;
+      gui.update();
       setStatus(file + " is now ready", 1);
     }
     loop();
@@ -264,12 +260,13 @@ void setStatus(String message, float seconds) {
   status = message;
 }
 void saveAnimation() {
-  String animationName = (String)JOptionPane.showInputDialog(frame, "name your creation", "Save BrightEyes animation", JOptionPane.PLAIN_MESSAGE);
-  if (file == null && animationName != null) {
-    file = animationName+".dat";
-    saveToDisk(file);
-    setStatus(file+" saved", 1.5);
+  if (file == null){
+    String animationName = (String)JOptionPane.showInputDialog(frame, "name your creation", "Save BrightEyes animation", JOptionPane.PLAIN_MESSAGE);
+    if(animationName != null) file = animationName+".dat";
+    else return;
   }
+  saveToDisk(file);
+  setStatus(file+" saved", 1.5);
 }
 void saveAs() {
   file = null;
