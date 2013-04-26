@@ -4,7 +4,7 @@ How to write your own firmware for the Bright Eyes board:
 
 Just use the Arduino IDE! Instructions for transferring the code to the board (as we don't use USB uploading like a normal Arduino) are given below. First though, a few notes on what you CAN'T do with the Bright Eyes board.
 
-The Bright Eyes bootloader uses EEPROM on the ATMEGA to store the size and last-modified date of the firmware file in order to avoid loading the same file at every boot. Using the same areas of EEPROM in your Arduino code will cause problems. The no-go areas of EEPROM are the last 8 bytes (as we store two DWORDS) - these are EEPROM addresses 0x3F8..0x3FF inclusive. 
+The Bright Eyes bootloader uses EEPROM on the ATMEGA to store the size and last-modified date of the firmware file in order to avoid loading the same file at every boot. Using the same areas of EEPROM in your Arduino code will cause problems. The no-go areas of EEPROM are the last 8 bytes (as we store two DWORDS) - these are EEPROM addresses 0x3F8..0x3FF inclusive.
 
 If none of the above makes much sense to you, or you aren't sure if you are using EEPROM, don't worry - it's very difficult to do without realising so the chances are EXTREMELY good that you are fine! (And you won't break your Bright Eyes even if there is an issue, strange things will just happen..).
 
@@ -19,6 +19,8 @@ For Mac: With the Arduino IDE open, select Arduino -> Preferences from the Menu 
 
 For Windows: With the Arduino IDE open, select File -> Preferences from the Menu bar (Ctrl+,). Ensure the checkbox labelled "Show verbose output during: compilation" is checked.
 
+For Linux: With the IDE open, go to File -> Preferences from the Menu Bar. Ensure the checkbox labelled "Show verbose output during: compilation" is checked.
+
 2. Compile (Verify) your code
 -----------------------------
 
@@ -29,21 +31,29 @@ Click the Check (Verify) button as opposed to the usual Arrow (Upload) button. T
 
 When compilation is complete, there will be a penultimate line in the console output which shows the location of the compiled file. For example, it might say something like:
 
-/var/folders/g7/btk0n8zs669b453qkgy94g980000gn/T/build2705930656204672901.tmp/sketch_nov12a.cpp.hex
+/var/folders/g7/btk0n8zs669b453qkgy94g980000gn/T/build2705930656204672901.tmp/sketch_nov12a.cpp.hex (Mac)
 
 or
 
-C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\sketch_nov12a.cpp.hex 
+C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\sketch_nov12a.cpp.hex (Windows)
+
+or
+
+/tmp/build8703933525218614874.tmp/sketch_nov12a.cpp.hex (Linux)
 
 We need to copy just the folder, not the full file location, so select from the start of this line to the \ or / before the end and copy that text (⌘+C for Mac, Ctrl+C for Windows).
 
-The clipboard will then contain something like: 
+The clipboard will then contain something like:
 
-/var/folders/g7/btk0n8zs669b453qkgy94g980000gn/T/build2705930656204672901.tmp/
+/var/folders/g7/btk0n8zs669b453qkgy94g980000gn/T/build2705930656204672901.tmp/ (Mac)
 
 or
 
-C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\
+C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\ (Windows)
+
+or
+
+/tmp/build8703933525218614874.tmp/ (Linux)
 
 4. Find the compiled .hex file and copy to your SD card
 -------------------------------------------------------
@@ -68,6 +78,18 @@ This folder will contain a large number of files (all of which are related in so
 
 You can now copy this file to your SD card. Place it in the root of the card (that is, not in any folders, just on the card itself).
 
+For Linux (tested on Ubuntu 12.10):
+
+In a terminal type: nautilus /tmp/build8703933525218614874.tmp/ (replacing nautilus with your file manager. Nautilus is the default for Ubuntu)
+
+or
+
+Open any file manager and go to / (the root directory). Then go to /temp/ and then the build... directory that was quoted by Arduino during compilation.
+
+then
+
+Find the .cpp.hex file of your program and copy it to the SD card in the root directory (so not within any folders).
+
 5. Rename the .hex file to firmware.hex
 ---------------------------------------
 
@@ -81,5 +103,3 @@ With the Bright Eyes turned off, insert the SD card and then switch the board on
 If for whatever reason, this doesn't work, try turning off the Bright Eyes board, reseating the SD card and turning the board on again.
 
 It is also important to note that the Bright Eyes board stores the file size and last-modified date of the most recently flashed file. It uses this information to avoid flashing the same file at every boot, so if you are trying to flash the same file over itself (although you should NEVER need to do this), try recompiling the source to create a .hex file with a different last-modified date.
-
-
