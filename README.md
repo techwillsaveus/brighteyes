@@ -20,7 +20,7 @@ LED Layout
 ==========
 
 LED ids start with the top-left LED at id 1 and continue to 87 on the left side, row by row
-then continue 88 to 174 on the right lens as you can see in the image bellow:<br />
+then continue 88 to 174 on the right lens as you can see in the image below:<br />
 <img src="https://f.cloud.github.com/assets/2814183/111495/2cd53e14-6af8-11e2-99bf-cd549a092dfc.png"><br />
 
 For Designers, an SVG with labelled LEDs is available <a href="https://github.com/twsu/brighteyes/blob/master/BrightEyesEditor/data/brighteyes.svg">here</a>

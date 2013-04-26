@@ -38,7 +38,7 @@ class GUI implements java.awt.event.ActionListener,javax.swing.event.ChangeListe
     
     Box brightnessBox = new Box(BoxLayout.X_AXIS);
     brightnessBox.add(new JLabel(" brightness(b/B): "));
-    ledBrightness = new JSlider(JSlider.HORIZONTAL,0,255,255);
+    ledBrightness = new JSlider(JSlider.HORIZONTAL,0,255,192);
     brightnessBox.add(ledBrightness);
     
     Box widthBox = new Box(BoxLayout.X_AXIS);
