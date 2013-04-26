@@ -33,7 +33,9 @@ When compilation is complete, there will be a penultimate line in the console ou
 
 or
 
-C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\sketch_nov12a.cpp.hex We need to copy just the folder, not the full file location, so select from the start of this line to the \ or / before the end and copy that text (⌘+C for Mac, Ctrl+C for Windows).
+C:\Users\Stefan\AppData\Local\Temp\build8839891328849755506.tmp\sketch_nov12a.cpp.hex 
+
+We need to copy just the folder, not the full file location, so select from the start of this line to the \ or / before the end and copy that text (⌘+C for Mac, Ctrl+C for Windows).
 
 The clipboard will then contain something like: 
 
